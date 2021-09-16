@@ -4,6 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "test-pattern": "jest --env=node --colors --verbose=true",
+    "test-00": "npm run test-pattern 00-*",
+    "test-01": "npm run test-pattern 01-*",
+    "test-02": "npm run test-pattern 02-*",
     "demo": "ts-node ./src/demo-data/run.ts",
     "test": "jest --env=node --colors test --verbose=true",
     "prettier": "prettier --write './{src,test}/**/*.ts'"
