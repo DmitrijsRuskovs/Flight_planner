@@ -34,7 +34,6 @@ namespace FlightPlannerD.Storage
                             }
                         }
                     }
-
                 }
             }
 
@@ -76,9 +75,9 @@ namespace FlightPlannerD.Storage
             {
                 foreach (var f in _flights)
                 {
-                    if (f.To.AirportCode.Trim().ToUpper() == flight.to.Trim().ToUpper() &&
-                        f.From.AirportCode.Trim().ToUpper() == flight.from.Trim().ToUpper() &&
-                        f.DepartureTime.Contains(flight.departureDate))
+                    if (f.To.AirportCode.Trim().ToUpper() == flight.To.Trim().ToUpper() &&
+                        f.From.AirportCode.Trim().ToUpper() == flight.From.Trim().ToUpper() &&
+                        f.DepartureTime.Contains(flight.DepartureDate))
                     {
                         flights.Add(f);
                     }
@@ -89,7 +88,6 @@ namespace FlightPlannerD.Storage
 
         public static bool IsFlight(Flight flight)
         {
-
             lock (balanceLock)
             {
                 if (flight == null)
@@ -98,27 +96,22 @@ namespace FlightPlannerD.Storage
                 }
                 else
                 {
-                    if (flight.ArrivalTime == null || flight.ArrivalTime == "" ||
-                        flight.DepartureTime == null || flight.DepartureTime == "" ||
-                        flight.Carrier == null || flight.Carrier == "" || flight.Carrier == "" || flight.Carrier.Trim().Length < 3 ||
-                        flight.To == null ||
-                        flight.To.AirportCode == null || flight.To.AirportCode == "" ||
-                        flight.To.City == null || flight.To.City == "" ||
-                        flight.To.Country == null || flight.To.Country == "" ||
-                        flight.From == null ||
-                        flight.From.AirportCode == null || flight.From.AirportCode == "" ||
-                        flight.From.City == null || flight.From.City == "" ||
-                        flight.From.Country == null || flight.From.Country == "" ||
-                        flight.To.AirportCode.Trim().ToUpper() == flight.From.AirportCode.Trim().ToUpper() ||
-                        DateTime.Parse(flight.ArrivalTime) <= DateTime.Parse(flight.DepartureTime))
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
+                    return
+                        (!string.IsNullOrEmpty(flight.ArrivalTime) &&
+                        !string.IsNullOrEmpty(flight.DepartureTime) &&
+                        !string.IsNullOrEmpty(flight.Carrier) &&
+                        flight.Carrier.Trim().Length >= 3 &&
+                        flight.To != null &&
+                        !string.IsNullOrEmpty(flight.To.AirportCode) &&
+                        !string.IsNullOrEmpty(flight.To.City) &&
+                        !string.IsNullOrEmpty(flight.To.Country) &&
+                        flight.From != null &&
+                        !string.IsNullOrEmpty(flight.From.AirportCode) &&
+                        !string.IsNullOrEmpty(flight.From.City) &&
+                        !string.IsNullOrEmpty(flight.From.Country) &&
+                        flight.To.AirportCode.Trim().ToUpper() != flight.From.AirportCode.Trim().ToUpper() &&
+                        DateTime.Parse(flight.ArrivalTime) > DateTime.Parse(flight.DepartureTime));
+                }   
             }
         }
 

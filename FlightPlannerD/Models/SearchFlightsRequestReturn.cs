@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace FlightPlannerD.Models
 {
@@ -11,27 +12,30 @@ namespace FlightPlannerD.Models
         private readonly static object balanceLock = new object();
 
         [Required]
-        public List<Flight> items { get; set; }
+        [JsonPropertyName("items")]
+        public List<Flight> Items { get; set; }
 
         [Required]
-        public int page { get; set; }
+        [JsonPropertyName("page")]
+        public int Page { get; set; }
 
         [Required]
-        public int totalItems { get; set; }
+        [JsonPropertyName("totalItems")]
+        public int TotalItems { get; set; }
 
         public SearchFlightsRequestReturn()
         {
-            page = 0; 
-            totalItems = 0;
+            Page = 0; 
+            TotalItems = 0;
         }
 
         public SearchFlightsRequestReturn(List<Flight> foundItems)
         {
             lock (balanceLock)
             {
-                items = foundItems;
-                page = 0;
-                totalItems = items.Count;
+                Items = foundItems;
+                Page = 0;
+                TotalItems = Items.Count;
             }
         }
     }

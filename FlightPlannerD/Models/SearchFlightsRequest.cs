@@ -7,20 +7,20 @@ namespace FlightPlannerD.Models
 {
     public class SearchFlightsRequest
     {
-        public string to { get; set; }
-        public string from { get; set; }
-        public string departureDate { get; set; }
+        public string To { get; set; }
+        public string From { get; set; }
+        public string DepartureDate { get; set; }
 
         public bool IsSearchFlightRequest()
         {
             bool result = true;
-            if (to == null || from == null || departureDate == null)
+            if (To == null || From == null || DepartureDate == null)
             {
                 result = false;
             }
             else 
             {
-                if (to.Trim().Length < 3 || from.Trim().Length < 3 || departureDate.Trim().Length < 10 || to.Trim().ToUpper() == from.Trim().ToUpper())
+                if (To.Trim().Length < 3 || From.Trim().Length < 3 || DepartureDate.Trim().Length < 10 || To.Trim().ToUpper() == From.Trim().ToUpper())
                 {
                     result = false;
                 }

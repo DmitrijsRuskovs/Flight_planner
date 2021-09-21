@@ -15,15 +15,13 @@ namespace FlightPlannerD.Controllers
     [ApiController]
     public class AdminController : ControllerBase
     {
-        private readonly object balanceLock1 = new object();
-        private readonly object balanceLock2 = new object();
-        private readonly object balanceLock3 = new object();
+        private readonly object balanceLock = new object();       
 
         [HttpGet]
         [Route("flights/{id}")]
         public IActionResult GetFlight(int id)
         {
-            lock (balanceLock1)
+            lock (balanceLock)
             {
                 var flight = FlightStorage.GetById(id);
                 return flight != null ? Ok(flight) : NotFound();
@@ -35,7 +33,7 @@ namespace FlightPlannerD.Controllers
         public IActionResult PutFlight(Flight flight)
         {
 
-            lock (balanceLock2)
+            lock (balanceLock)
             {
                 if (!FlightStorage.IsFlight(flight))
                 {
@@ -60,7 +58,7 @@ namespace FlightPlannerD.Controllers
         [Route("flights/{id}")]
         public IActionResult DeleteFlight(int id)
         {
-            lock (balanceLock3)
+            lock (balanceLock)
             {
                 return FlightStorage.DeleteFlight(id) ? Ok() : Ok();
             }

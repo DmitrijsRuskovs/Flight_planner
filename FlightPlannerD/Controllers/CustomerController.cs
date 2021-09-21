@@ -16,8 +16,7 @@ namespace FlightPlannerD.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
-        private readonly object balanceLock = new object();
-        
+        private readonly object balanceLock = new object();      
 
         [Route("flights/{id}")]
         [HttpGet]
