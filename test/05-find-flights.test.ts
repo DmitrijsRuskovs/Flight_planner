@@ -35,7 +35,7 @@ describe("Finding Flights", () => {
         done()
     });
 
-    it("should not find anything when non existing flight id passed", async done => {
+    /*it("should not find anything when non existing flight id passed", async done => {
         try {
             await CustomerFlightApi.findFlightById(666)
             done.fail()
@@ -77,5 +77,5 @@ describe("Finding Flights", () => {
             expect(e.response.status).toBe(400);
             done();
         }
-    });
+    });*/
 });

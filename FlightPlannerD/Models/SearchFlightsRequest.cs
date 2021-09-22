@@ -11,7 +11,7 @@ namespace FlightPlannerD.Models
         public string From { get; set; }
         public string DepartureDate { get; set; }
 
-        public bool IsSearchFlightRequest()
+        public bool IsValidSearchFlightRequest()
         {
             bool result = true;
             if (To == null || From == null || DepartureDate == null)

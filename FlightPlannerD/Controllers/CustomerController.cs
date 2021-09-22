@@ -1,10 +1,12 @@
-﻿using FlightPlannerD.Models;
+﻿using FlightPlannerD.DbContext;
+using FlightPlannerD.Models;
 using FlightPlannerD.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -16,7 +18,50 @@ namespace FlightPlannerD.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
-        private readonly object balanceLock = new object();      
+        private readonly object balanceLock = new object();
+
+        private readonly FlightPlannerDbContext _context;
+        
+        public CustomerController(FlightPlannerDbContext context)
+        {
+            _context = context;
+        }
+
+        private List<Airport> SearchAirports(string part)
+        {
+            part = part.Trim().ToUpper();
+            List<Airport> airport = new List<Airport>();
+            lock (balanceLock)
+            {
+                airport = (
+                   from a in _context.Airports
+                   where (a.AirportCode.Trim().ToUpper().Contains(part) ||
+                          a.City.Trim().ToUpper().Contains(part) ||
+                          a.Country.Trim().ToUpper().Contains(part))
+                   select a).ToList();               
+            }
+
+            return airport;
+        }
+
+        private List<Flight> SearchFlights(SearchFlightsRequest flight)
+        {
+            List<Flight> flights = new List<Flight>();
+            lock (balanceLock)
+            {
+                flights = (
+                    from f in _context.Flights 
+                    where (f.To.AirportCode.Trim().ToUpper() == flight.To.Trim().ToUpper() &&
+                           f.From.AirportCode.Trim().ToUpper() == flight.From.Trim().ToUpper() &&
+                           f.DepartureTime.Contains(flight.DepartureDate))
+                    select f)
+                    .Include(a => a.To)
+                    .Include(a => a.From).
+                    ToList();              
+            }
+
+            return flights;
+        }
 
         [Route("flights/{id}")]
         [HttpGet]
@@ -24,7 +69,11 @@ namespace FlightPlannerD.Controllers
         {
             lock (balanceLock)
             {
-                var flight = FlightStorage.GetById(id);
+                var flight = _context.Flights                  
+                    .Include(f => f.To)
+                    .Include(f => f.From)
+                    .SingleOrDefault(f => f.Id == id);
+
                 return flight != null ? Ok(flight) : NotFound();
             }
         }
@@ -35,13 +84,13 @@ namespace FlightPlannerD.Controllers
         {
             lock (balanceLock)
             {
-                if (!req.IsSearchFlightRequest())
+                if (!req.IsValidSearchFlightRequest())
                 {
                     return BadRequest();
                 }
                 else
                 {
-                    return Ok(new SearchFlightsRequestReturn(FlightStorage.SearchFlights(req)));
+                    return Ok(new SearchFlightsRequestReturn(SearchFlights(req)));
                 }
             }
         }
@@ -52,7 +101,7 @@ namespace FlightPlannerD.Controllers
         {
             lock (balanceLock)
             {
-                List<Airport> airport = FlightStorage.SearchAirport(search);
+                List<Airport> airport = SearchAirports(search);
                 return Ok(airport);
             }
         }
