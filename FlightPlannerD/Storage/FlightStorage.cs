@@ -13,7 +13,7 @@ namespace FlightPlannerD.Storage
         private readonly static object balanceLock = new object();
         private static int _lastId = 0;
 
-        public static bool Exists(Flight flight)
+        public static bool FlightExists(Flight flight)
         {
             bool result = false;
             lock (balanceLock)
@@ -86,7 +86,7 @@ namespace FlightPlannerD.Storage
             return flights;
         }
 
-        public static bool IsFlight(Flight flight)
+        public static bool IsValidFlight(Flight flight)
         {
             lock (balanceLock)
             {

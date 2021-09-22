@@ -35,7 +35,7 @@ namespace FlightPlannerD.Controllers
         {
             lock (balanceLock)
             {
-                if (!req.IsSearchFlightRequest())
+                if (!req.IsValidSearchFlightRequest())
                 {
                     return BadRequest();
                 }

@@ -35,13 +35,13 @@ namespace FlightPlannerD.Controllers
 
             lock (balanceLock)
             {
-                if (!FlightStorage.IsFlight(flight))
+                if (!FlightStorage.IsValidFlight(flight))
                 {
                     return BadRequest();
                 }
                 else
                 {
-                    if (FlightStorage.Exists(flight))
+                    if (FlightStorage.FlightExists(flight))
                     {
                         return Conflict();
                     }
