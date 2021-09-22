@@ -4,9 +4,9 @@ using FlightPlannerD.Storage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -27,19 +27,44 @@ namespace FlightPlannerD.Controllers
 
         private bool FlightExists(Flight flight)
         {
-            lock (balanceLock)
+            bool result = true;
+            
+                if (_context.Flights.Count() == 0)
+                {
+                lock (balanceLock)
+                {
+                    result = false;
+                }
+                }
+            
+            if (flight != null)
             {
-                bool result = false;           
-                result = (_context.Flights.Any(f =>
-                      (f.To.AirportCode.Trim().ToUpper() == flight.To.AirportCode.Trim().ToUpper()) &&
-                      (f.From.AirportCode.Trim().ToUpper() == flight.From.AirportCode.Trim().ToUpper()) &&
-                      (f.DepartureTime.Trim().ToUpper() == flight.DepartureTime.Trim().ToUpper()) &&
-                      (f.ArrivalTime.Trim().ToUpper() == flight.ArrivalTime.Trim().ToUpper()) &&
-                      (f.Carrier.Trim().ToUpper() == flight.Carrier.Trim().ToUpper())
-                ));
+                if (flight.To != null && flight.From != null)
+                {
+                    foreach (var f in _context.Flights)
+                    {
+                        if (f != null)
+                        {
+                            if (f.To != null && f.From != null)
+                            {
+                                lock (balanceLock)
+                                {
+                                    if ((f.To.AirportCode.Trim().ToUpper() != flight.To.AirportCode.Trim().ToUpper()) ||
+                                   (f.From.AirportCode.Trim().ToUpper() != flight.From.AirportCode.Trim().ToUpper()) ||
+                                   (f.DepartureTime.Trim().ToUpper() != flight.DepartureTime.Trim().ToUpper()) ||
+                                   (f.ArrivalTime.Trim().ToUpper() != flight.ArrivalTime.Trim().ToUpper()) ||
+                                   (f.Carrier.Trim().ToUpper() != flight.Carrier.Trim().ToUpper()))
+                                    {
+                                        result = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
 
-                return result;
-            }          
         }
 
         [HttpGet]
@@ -61,8 +86,7 @@ namespace FlightPlannerD.Controllers
         [Route("flights")]
         public IActionResult PutFlight(Flight flight)
         {
-            lock (balanceLock)
-            {
+            
                 if (!FlightStorage.IsValidFlight(flight))
                 {
                     return BadRequest();
@@ -71,7 +95,10 @@ namespace FlightPlannerD.Controllers
                 {
                     if (FlightExists(flight))
                     {
-                        return Conflict();
+                        lock (balanceLock)
+                        {
+                            return Conflict();
+                        }
                     }
                     else
                     {
@@ -83,7 +110,7 @@ namespace FlightPlannerD.Controllers
                         }                      
                     }
                 }
-            }
+            
 
         }
 
