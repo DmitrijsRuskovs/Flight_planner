@@ -24,49 +24,7 @@ namespace FlightPlannerD.Controllers
         {
             _context = context;
         }
-
-        private bool FlightExists(Flight flight)
-        {
-            bool result = true;
-            
-                if (_context.Flights.Count() == 0)
-                {
-                lock (balanceLock)
-                {
-                    result = false;
-                }
-                }
-            
-            if (flight != null)
-            {
-                if (flight.To != null && flight.From != null)
-                {
-                    foreach (var f in _context.Flights)
-                    {
-                        if (f != null)
-                        {
-                            if (f.To != null && f.From != null)
-                            {
-                                lock (balanceLock)
-                                {
-                                    if ((f.To.AirportCode.Trim().ToUpper() != flight.To.AirportCode.Trim().ToUpper()) ||
-                                   (f.From.AirportCode.Trim().ToUpper() != flight.From.AirportCode.Trim().ToUpper()) ||
-                                   (f.DepartureTime.Trim().ToUpper() != flight.DepartureTime.Trim().ToUpper()) ||
-                                   (f.ArrivalTime.Trim().ToUpper() != flight.ArrivalTime.Trim().ToUpper()) ||
-                                   (f.Carrier.Trim().ToUpper() != flight.Carrier.Trim().ToUpper()))
-                                    {
-                                        result = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return result;
-
-        }
-
+      
         [HttpGet]
         [Route("flights/{id}")]
         public IActionResult GetFlight(int id)
@@ -86,32 +44,24 @@ namespace FlightPlannerD.Controllers
         [Route("flights")]
         public IActionResult PutFlight(Flight flight)
         {
-            
-                if (!FlightStorage.IsValidFlight(flight))
-                {
-                    return BadRequest();
-                }
-                else
-                {
-                    if (FlightExists(flight))
-                    {
-                        lock (balanceLock)
-                        {
-                            return Conflict();
-                        }
-                    }
-                    else
-                    {
-                        lock (balanceLock)
-                        {
-                            _context.Flights.Add(flight);
-                            _context.SaveChanges();
-                            return Created("", flight);
-                        }                      
-                    }
-                }
-            
 
+            if (!FlightStorage.IsValidFlight(flight))
+            {
+                return BadRequest();
+            }
+            else if (FlightStorage.FlightExists(_context, flight))
+            {
+                return Conflict();
+            }
+            else
+            {
+                lock (balanceLock)
+                {
+                    FlightStorage.AddFlight(_context, flight);
+                    
+                    return Created("", flight);
+                }
+            }                         
         }
 
         [HttpDelete]
@@ -129,16 +79,15 @@ namespace FlightPlannerD.Controllers
                 {
                     if (flight.To != null)
                     {
-                        _context.Airports.Remove(flight.To);
+                        FlightStorage.RemoveAirport(_context, flight.To);
                     }
 
                     if (flight.From != null)
                     {
-                        _context.Airports.Remove(flight.From);
+                        FlightStorage.RemoveAirport(_context, flight.From);
                     }
 
-                    _context.Flights.Remove(flight);
-                    _context.SaveChanges();
+                    FlightStorage.RemoveFlight(_context, flight);
                 }
 
                 return Ok();

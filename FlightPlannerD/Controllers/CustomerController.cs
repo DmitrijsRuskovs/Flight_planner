@@ -25,24 +25,7 @@ namespace FlightPlannerD.Controllers
         public CustomerController(FlightPlannerDbContext context)
         {
             _context = context;
-        }
-
-        private List<Airport> SearchAirports(string part)
-        {
-            part = part.Trim().ToUpper();
-            List<Airport> airport = new List<Airport>();
-            lock (balanceLock)
-            {
-                airport = (
-                   from a in _context.Airports
-                   where (a.AirportCode.Trim().ToUpper().Contains(part) ||
-                          a.City.Trim().ToUpper().Contains(part) ||
-                          a.Country.Trim().ToUpper().Contains(part))
-                   select a).ToList();               
-            }
-
-            return airport;
-        }
+        }     
 
         private List<Flight> SearchFlights(SearchFlightsRequest flight)
         {
@@ -96,12 +79,12 @@ namespace FlightPlannerD.Controllers
         }
 
         [HttpGet]
-        [Route("airports")]      
+        [Route("airports/")]      
         public IActionResult SearchAirport(string search)
         {
             lock (balanceLock)
             {
-                List<Airport> airport = SearchAirports(search);
+                List<Airport> airport = FlightStorage.SearchAirports(_context, search);
                 return Ok(airport);
             }
         }

@@ -9,7 +9,7 @@ describe("Concurrency Handling", () => {
 
     beforeEach(() => TestApi.clear());
 
-    /*it("should handle concurrent adding & deleting", async done => {
+    it("should handle concurrent adding & deleting", async done => {
         await Promise.all(_.range(0, 100).map(async () => {
             const request = randomAddFlightRequest()
             const response = await AdminFlightApi.addFlight(request)
@@ -19,7 +19,7 @@ describe("Concurrency Handling", () => {
         }))
 
         done()
-    }, 60000);*/
+    }, 60000);
 
     it("should not be able to add the same flight twice", async done => {
         const request = randomAddFlightRequest()

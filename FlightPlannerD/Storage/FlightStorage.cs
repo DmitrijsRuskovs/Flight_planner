@@ -1,15 +1,82 @@
-﻿using FlightPlannerD.Models;
+﻿using FlightPlannerD.DbContext;
+using FlightPlannerD.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlightPlannerD.Storage
 {
     public class FlightStorage
     {
         private readonly static object balanceLock = new object();
-           
+
+        public static List<Airport> SearchAirports(FlightPlannerDbContext context, string part)
+        {
+            part = part.Trim().ToUpper();
+            lock (balanceLock)
+            {
+                return (
+                   from a in context.Airports
+                   where (a.AirportCode.Trim().ToUpper().Contains(part) ||
+                          a.City.Trim().ToUpper().Contains(part) ||
+                          a.Country.Trim().ToUpper().Contains(part))
+                   select a).ToList();
+            }
+        }
+
+        public static void AddFlight(FlightPlannerDbContext context, Flight flight)
+        {
+            lock (balanceLock)
+            {
+                context.Flights.Add(flight);
+            }
+            lock (balanceLock)
+            {
+                context.SaveChanges();
+            }
+        }
+
+        public static void RemoveFlight(FlightPlannerDbContext context, Flight flight)
+        {
+            lock (balanceLock)
+            {
+                context.Flights.Remove(flight);
+            }
+            lock (balanceLock)
+            {
+                context.SaveChanges();
+            }
+        }
+
+        public static void RemoveAirport(FlightPlannerDbContext context, Airport airport)
+        {
+            lock (balanceLock)
+            {
+                context.Airports.Remove(airport);
+            }
+            lock (balanceLock)
+            {
+                context.SaveChanges();
+            }
+        }
+
+        public static bool FlightExists(FlightPlannerDbContext context, Flight flight)
+        {
+            lock (balanceLock)
+            {
+                return context.Flights
+                    .Include(f => f.To)
+                    .Include(f => f.From).ToList().Any(f => 
+                    ((f.DepartureTime.Trim().ToUpper() == flight.DepartureTime.Trim().ToUpper()) &&
+                     (f.ArrivalTime.Trim().ToUpper() == flight.ArrivalTime.Trim().ToUpper()) &&
+                     (f.Carrier.Trim().ToUpper() == flight.Carrier.Trim().ToUpper()) &&
+                     (f.To.AirportCode.Trim().ToUpper() == flight.To.AirportCode.Trim().ToUpper()) &&
+                     (f.From.AirportCode.Trim().ToUpper() == flight.From.AirportCode.Trim().ToUpper())));
+            }
+        }
+
         public static bool IsValidFlight(Flight flight)
         {
             lock (balanceLock)
