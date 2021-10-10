@@ -3,7 +3,6 @@ using FlightPlannerD.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlightPlannerD.Storage
@@ -11,6 +10,36 @@ namespace FlightPlannerD.Storage
     public class FlightStorage
     {
         private readonly static object balanceLock = new object();
+
+        public static Flight GetByID(FlightPlannerDbContext context, int id)
+        {
+            lock (balanceLock)
+            {
+                return context.Flights
+                    .Include(f => f.To)
+                    .Include(f => f.From)
+                    .SingleOrDefault(f => f.Id == id);
+            }
+        }
+
+        public static List<Flight> SearchFlights(FlightPlannerDbContext context, SearchFlightsRequest flight)
+        {           
+            List<Flight> flights = new List<Flight>();
+            lock (balanceLock)
+            {
+                flights = (
+                    from f in context.Flights
+                    where (f.To.AirportCode.Trim().ToUpper() == flight.To.Trim().ToUpper() &&
+                           f.From.AirportCode.Trim().ToUpper() == flight.From.Trim().ToUpper() &&
+                           f.DepartureTime.Contains(flight.DepartureDate))
+                    select f)
+                    .Include(a => a.To)
+                    .Include(a => a.From).
+                    ToList();
+            }
+
+            return flights;
+        }
 
         public static List<Airport> SearchAirports(FlightPlannerDbContext context, string part)
         {

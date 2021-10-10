@@ -2,13 +2,9 @@
 using FlightPlannerD.Models;
 using FlightPlannerD.Storage;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace FlightPlannerD.Controllers
 {
@@ -31,11 +27,7 @@ namespace FlightPlannerD.Controllers
         {
             lock (balanceLock)
             {
-                var flight = _context.Flights
-                    .Include(f => f.To)
-                    .Include(f => f.From)
-                    .SingleOrDefault(f => f.Id == id);
-              
+                var flight = FlightStorage.GetByID(_context, id);
                 return flight != null ? Ok(flight) : NotFound();
             }
         }
@@ -57,8 +49,7 @@ namespace FlightPlannerD.Controllers
             {
                 lock (balanceLock)
                 {
-                    FlightStorage.AddFlight(_context, flight);
-                    
+                    FlightStorage.AddFlight(_context, flight);                   
                     return Created("", flight);
                 }
             }                         
@@ -70,26 +61,18 @@ namespace FlightPlannerD.Controllers
         {
             lock (balanceLock)
             {
-                var flight = _context.Flights
-                    .Include(f => f.To)
-                    .Include(f => f.From)
-                    .SingleOrDefault(f => f.Id == id);
-
-                if (flight != null)
+                var flight = FlightStorage.GetByID(_context, id);
+                if (flight?.To != null)
                 {
-                    if (flight.To != null)
-                    {
-                        FlightStorage.RemoveAirport(_context, flight.To);
-                    }
-
-                    if (flight.From != null)
-                    {
-                        FlightStorage.RemoveAirport(_context, flight.From);
-                    }
-
-                    FlightStorage.RemoveFlight(_context, flight);
+                    FlightStorage.RemoveAirport(_context, flight.To);
                 }
 
+                if (flight?.From != null)
+                {
+                    FlightStorage.RemoveAirport(_context, flight.From);
+                }
+
+                FlightStorage.RemoveFlight(_context, flight);
                 return Ok();
             }
         }

@@ -1,12 +1,5 @@
 ﻿using FlightPlannerD.DbContext;
-using FlightPlannerD.Storage;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 
 namespace FlightPlannerD.Controllers
 {
@@ -29,14 +22,8 @@ namespace FlightPlannerD.Controllers
         {
             lock (balanceLock)
             {
-                _context.RemoveRange(_context.Airports);                                               
-            }
-            lock (balanceLock)
-            {
-                _context.RemoveRange(_context.Flights);
-            }
-            lock (balanceLock)
-            {
+                _context.RemoveRange(_context.Airports);                                                           
+                _context.RemoveRange(_context.Flights);        
                 _context.SaveChanges();
                 return Ok();
             }
