@@ -1,9 +1,12 @@
-﻿using FlightPlannerD.DbContext;
-using FlightPlannerD.Models;
-using FlightPlannerD.Storage;
+﻿using AutoMapper;
+using FlightPlanner.Core.Dto;
+using FlightPlanner.Core.Models;
+using FlightPlanner.Core.Services;
+using FlightPlanner.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace FlightPlannerD.Controllers
@@ -14,45 +17,51 @@ namespace FlightPlannerD.Controllers
     public class AdminController : ControllerBase
     {
         private readonly object balanceLock = new object();
-
-        private readonly FlightPlannerDbContext _context;
-        public AdminController(FlightPlannerDbContext context)
+        private readonly IEntityService<Flight> _flightService;
+        private readonly IMapper _mapper;
+        private readonly IEnumerable<IValidator> _validators;
+        public AdminController(IFlightService flightService, IMapper mapper, IEnumerable<IValidator> validators)
         {
-            _context = context;
+            _flightService = flightService;
+            _mapper = mapper;
+            _validators = validators;
         }
-      
+
         [HttpGet]
         [Route("flights/{id}")]
         public IActionResult GetFlight(int id)
         {
             lock (balanceLock)
             {
-                var flight = FlightStorage.GetByID(_context, id);
-                return flight != null ? Ok(flight) : NotFound();
+                var flight = _flightService.GetById(id);
+                return flight != null ? Ok(_mapper.Map<FlightResponse>(flight)) : NotFound();
             }
         }
 
         [HttpPut]
         [Route("flights")]
-        public IActionResult PutFlight(Flight flight)
+        public IActionResult PutFlight(FlightRequest request)
         {
-
-            if (!FlightStorage.IsValidFlight(flight))
+            lock (balanceLock)
             {
-                return BadRequest();
-            }
-            else if (FlightStorage.FlightExists(_context, flight))
-            {
-                return Conflict();
-            }
-            else
-            {
-                lock (balanceLock)
+                if (!_validators.All(s => s.IsValid(request)))
                 {
-                    FlightStorage.AddFlight(_context, flight);                   
-                    return Created("", flight);
+                    return BadRequest();
                 }
-            }                         
+            }
+                var flight = _mapper.Map<Flight>(request);
+            lock (balanceLock)
+            {
+                if (_flightService.Exists(flight))
+                {
+                    return Conflict();
+                }
+            }
+            lock (balanceLock)
+            {
+                _flightService.Create(flight);
+                return Created("", _mapper.Map<FlightResponse>(flight));
+            }           
         }
 
         [HttpDelete]
@@ -61,20 +70,10 @@ namespace FlightPlannerD.Controllers
         {
             lock (balanceLock)
             {
-                var flight = FlightStorage.GetByID(_context, id);
-                if (flight?.To != null)
-                {
-                    FlightStorage.RemoveAirport(_context, flight.To);
-                }
-
-                if (flight?.From != null)
-                {
-                    FlightStorage.RemoveAirport(_context, flight.From);
-                }
-
-                FlightStorage.RemoveFlight(_context, flight);
-                return Ok();
+                _flightService.DeleteFlightById(id);             
             }
-        }
+            return Ok();
+        } 
+                
     }
 }

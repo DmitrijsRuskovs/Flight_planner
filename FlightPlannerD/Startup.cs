@@ -13,7 +13,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using FlightPlannerD.DbContext;
+using FlightPlanner.Data;
+using FlightPlanner.Services;
+using FlightPlanner.Services.Validators;
+using FlightPlanner.Core.Services;
+using FlightPlanner.Core.Models;
+using FlightPlanner.Web.Mappings;
+using AutoMapper;
+using FlightPlanner.Services.SearchValidators;
 
 namespace FlightPlannerD
 {
@@ -42,6 +49,27 @@ namespace FlightPlannerD
 
             services.AddDbContext<FlightPlannerDbContext>(options =>
                options.UseSqlServer(Configuration.GetConnectionString("flight-planner")));
+
+            services.AddScoped<IFlightPlannerDbContext, FlightPlannerDbContext>();
+            services.AddScoped<IDbService, DbService>();
+            services.AddScoped<IEntityService<Flight>, EntityService<Flight>>();
+            services.AddScoped<IEntityService<Airport>, EntityService<Airport>>();
+            services.AddScoped<IDbServiceExtended, DbServiceExtended>();
+            services.AddScoped<IFlightService, FlightService>();
+            services.AddScoped<IAirportService, AirportService>();
+            var cfg = AutoMapperConfiguration.GetConfig();
+            services.AddSingleton(typeof(IMapper), cfg);
+            services.AddScoped<IValidator, AirportCodeEqualityValidator>();
+            services.AddScoped<IValidator, AirportCodeValidator>();
+            services.AddScoped<IValidator, ArrivalTimeValidator>();
+            services.AddScoped<IValidator, DepartureTimeValidator>();
+            services.AddScoped<IValidator, CarrierValidator>();
+            services.AddScoped<IValidator, CountryValidator>();
+            services.AddScoped<IValidator, CityValidator>();
+            services.AddScoped<IValidator, TimeFrameValidator>();
+            services.AddScoped<ISearchValidator, SearchAirportCodeEqualityValidator>();
+            services.AddScoped<ISearchValidator, SearchAirportCodeValidator>();
+            services.AddScoped<ISearchValidator, SearchDepartureTimeValidator>();
 
         }
 

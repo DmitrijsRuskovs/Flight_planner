@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31613.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightPlannerD", "..\FlightPlannerD\FlightPlannerD.csproj", "{38CA1CE5-E65C-4303-8F9B-C947D6AA82F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightPlanner.Web", "..\FlightPlannerD\FlightPlanner.Web.csproj", "{38CA1CE5-E65C-4303-8F9B-C947D6AA82F4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightPlanner.Core", "FlightPlanner.Core\FlightPlanner.Core.csproj", "{D818E4AA-BE6A-4D61-9C8C-676F7C29B199}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightPlanner.Data", "FlightPlanner.Data\FlightPlanner.Data.csproj", "{B7F155AA-2CBB-43C6-A4CA-5C9DFDEF3EE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightPlanner.Services", "FlightPlanner.Services\FlightPlanner.Services.csproj", "{C9C7632D-E237-4650-98E6-5BF974A17BE2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{38CA1CE5-E65C-4303-8F9B-C947D6AA82F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38CA1CE5-E65C-4303-8F9B-C947D6AA82F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38CA1CE5-E65C-4303-8F9B-C947D6AA82F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D818E4AA-BE6A-4D61-9C8C-676F7C29B199}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D818E4AA-BE6A-4D61-9C8C-676F7C29B199}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D818E4AA-BE6A-4D61-9C8C-676F7C29B199}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D818E4AA-BE6A-4D61-9C8C-676F7C29B199}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7F155AA-2CBB-43C6-A4CA-5C9DFDEF3EE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7F155AA-2CBB-43C6-A4CA-5C9DFDEF3EE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7F155AA-2CBB-43C6-A4CA-5C9DFDEF3EE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7F155AA-2CBB-43C6-A4CA-5C9DFDEF3EE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9C7632D-E237-4650-98E6-5BF974A17BE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9C7632D-E237-4650-98E6-5BF974A17BE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9C7632D-E237-4650-98E6-5BF974A17BE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9C7632D-E237-4650-98E6-5BF974A17BE2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

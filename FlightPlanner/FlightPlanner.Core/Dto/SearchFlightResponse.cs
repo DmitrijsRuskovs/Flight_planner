@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
-namespace FlightPlannerD.Models
+namespace FlightPlanner.Core.Dto
 {
-    public class SearchFlightsRequestReturn
+
+    public class SearchFlightResponse
     {
+
         private readonly static object balanceLock = new object();
 
         [Required]
         [JsonPropertyName("items")]
-        public List<Flight> Items { get; set; }
+        public List<FlightResponse> Items { get; set; }
 
         [Required]
         [JsonPropertyName("page")]
@@ -23,13 +26,13 @@ namespace FlightPlannerD.Models
         [JsonPropertyName("totalItems")]
         public int TotalItems { get; set; }
 
-        public SearchFlightsRequestReturn()
+        public SearchFlightResponse()
         {
-            Page = 0; 
+            Page = 0;
             TotalItems = 0;
         }
 
-        public SearchFlightsRequestReturn(List<Flight> foundItems)
+        public SearchFlightResponse(List<FlightResponse> foundItems)
         {
             lock (balanceLock)
             {
@@ -38,5 +41,5 @@ namespace FlightPlannerD.Models
                 TotalItems = Items.Count;
             }
         }
-    }
+    }    
 }

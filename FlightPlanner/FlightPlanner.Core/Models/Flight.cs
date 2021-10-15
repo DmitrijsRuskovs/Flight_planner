@@ -1,7 +1,12 @@
-﻿
-namespace FlightPlannerD.Models
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FlightPlanner.Core.Models
 {
-    public class Flight
+    public class Flight : Entity
     {
         public Flight(int id)
         {
@@ -12,11 +17,15 @@ namespace FlightPlannerD.Models
         {
         }
 
-        public int Id { get; set; }
+        
         public Airport To { get; set; }
+
         public Airport From { get; set; }
-        public string Carrier{ get; set; }
+
+        public string Carrier { get; set; }
         public string DepartureTime { get; set; }
         public string ArrivalTime { get; set; }
     }
+
 }
+

@@ -1,4 +1,6 @@
-﻿using FlightPlannerD.DbContext;
+﻿using FlightPlanner.Core.Models;
+using FlightPlanner.Core.Services;
+using FlightPlanner.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightPlannerD.Controllers
@@ -9,11 +11,11 @@ namespace FlightPlannerD.Controllers
     {
         private readonly object balanceLock = new object();
 
-        private readonly FlightPlannerDbContext _context;
+        private readonly IDbServiceExtended _service;
 
-        public TestingController(FlightPlannerDbContext context)
+        public TestingController(IDbServiceExtended service)
         {
-            _context = context;
+            _service = service;
         }
 
         [Route("clear")]
@@ -22,9 +24,8 @@ namespace FlightPlannerD.Controllers
         {
             lock (balanceLock)
             {
-                _context.RemoveRange(_context.Airports);                                                           
-                _context.RemoveRange(_context.Flights);        
-                _context.SaveChanges();
+                _service.DeleteAll<Flight>();
+                _service.DeleteAll<Airport>();
                 return Ok();
             }
         }
