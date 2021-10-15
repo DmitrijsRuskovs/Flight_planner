@@ -18,8 +18,6 @@ namespace FlightPlanner.Services
 
         public List<Flight> SearchFlights(SearchFlightRequest flight)
         {
-            lock (balanceLock)
-            {
                 List<Flight> flights = new List<Flight>();
                 flights = (
                     from f in _context.Flights
@@ -31,24 +29,18 @@ namespace FlightPlanner.Services
                     select f)
                     .ToList();
                 return flights;
-            }
         }
 
         public Flight GetFullFlightById(int id)
         {
-            lock (balanceLock)
-            {
                 return _context.Flights
-                .Include(f => f.From)
-                .Include(f => f.To)
-                .SingleOrDefault(f => f.Id == id);
-            }
+                    .Include(f => f.From)
+                    .Include(f => f.To)
+                    .SingleOrDefault(f => f.Id == id);
         }
 
         public void DeleteFlightById(int id)
         {
-            lock (balanceLock)
-            {
                 var flight = GetFullFlightById(id);
                 if (flight != null)
                 {
@@ -62,13 +54,10 @@ namespace FlightPlanner.Services
                     }
                     Delete(flight);
                 }
-            }
         }
 
         public bool Valid(Flight flight)
         {
-            lock (balanceLock)
-            {
                 if (flight == null)
                 {
                     return false;
@@ -91,13 +80,10 @@ namespace FlightPlanner.Services
                         flight.To.AirportCode.Trim().ToUpper() != flight.From.AirportCode.Trim().ToUpper() &&
                         DateTime.Parse(flight.ArrivalTime) > DateTime.Parse(flight.DepartureTime));
                 }
-            }
         }
 
         public bool Exists(Flight flight)
         {
-            lock (balanceLock)
-            {
                 return Query()
                     .Include(f => f.To)
                     .Include(f => f.From).ToList().Any(f =>
@@ -106,7 +92,6 @@ namespace FlightPlanner.Services
                      (f.Carrier.Trim().ToUpper() == flight.Carrier.Trim().ToUpper()) &&
                      (f.To.AirportCode.Trim().ToUpper() == flight.To.AirportCode.Trim().ToUpper()) &&
                      (f.From.AirportCode.Trim().ToUpper() == flight.From.AirportCode.Trim().ToUpper())));
-            }
         }
 
     }

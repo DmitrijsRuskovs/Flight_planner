@@ -6,13 +6,12 @@ using FlightPlannerD.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FlightPlanner.Services
 {
     public class EntityService<T> : DbService, IEntityService<T> where T : Entity
     {
+
         public EntityService(FlightPlannerDbContext context) : base(context)
         {
         }

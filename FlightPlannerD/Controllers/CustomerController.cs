@@ -2,7 +2,6 @@
 using FlightPlanner.Core.Dto;
 using FlightPlanner.Core.Models;
 using FlightPlanner.Core.Services;
-using FlightPlanner.Data;
 using FlightPlannerD.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -32,50 +31,41 @@ namespace FlightPlannerD.Controllers
         [HttpGet]
         public IActionResult SearchFlightById(int id)
         {
-            lock (balanceLock)
-            {
-                var flight = _flightService.GetFullFlightById(id);
-                return flight != null ? Ok(_mapper.Map<FlightResponse>(flight)) : NotFound();
-            }
+            var flight = _flightService.GetFullFlightById(id);
+            return flight != null ? Ok(_mapper.Map<FlightResponse>(flight)) : NotFound();
         }
 
         [Route("flights/search")]
         [HttpPost]
         public IActionResult SearchFlight(SearchFlightRequest request)
         {
-            lock (balanceLock)
+            if (!_searchValidators.All(s => s.IsValid(request)))
             {
-                if (!_searchValidators.All(s => s.IsValid(request)))
-                {
-                    return BadRequest();
-                }
-
-                var flights = _flightService.SearchFlights(request);
-                List<FlightResponse> flightResponse = new List<FlightResponse>();
-                foreach (var f in (List<Flight>)flights)
-                {
-                    flightResponse.Add(_mapper.Map<FlightResponse>(f));
-                }
-
-                return Ok(new SearchFlightResponse(flightResponse));
+                return BadRequest();
             }
+
+            var flights = _flightService.SearchFlights(request);
+            List<FlightResponse> flightResponse = new List<FlightResponse>();
+            foreach (var f in (List<Flight>)flights)
+            {
+                flightResponse.Add(_mapper.Map<FlightResponse>(f));
+            }
+
+            return Ok(new SearchFlightResponse(flightResponse));
         }
 
         [HttpGet]
         [Route("airports/")]
         public IActionResult SearchAirport(string search)
         {
-            lock (balanceLock)
+            var airport = _airportService.SearchAirports(search);
+            List<AirportResponse> airportResponse = new List<AirportResponse>();
+            foreach (var a in airport)
             {
-                var airport = _airportService.SearchAirports(search);
-                List<AirportResponse> airportResponse = new List<AirportResponse>();
-                foreach (var a in airport)
-                {
-                    airportResponse.Add(_mapper.Map<AirportResponse>(a));
-                }
-
-                return Ok(airportResponse);
+                airportResponse.Add(_mapper.Map<AirportResponse>(a));
             }
+
+            return Ok(airportResponse);
         }
     }  
 }

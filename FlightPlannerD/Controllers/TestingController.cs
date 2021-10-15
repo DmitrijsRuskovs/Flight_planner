@@ -1,6 +1,5 @@
 ﻿using FlightPlanner.Core.Models;
 using FlightPlanner.Core.Services;
-using FlightPlanner.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightPlannerD.Controllers
@@ -22,12 +21,9 @@ namespace FlightPlannerD.Controllers
         [HttpPost]
         public IActionResult Clear()
         {
-            lock (balanceLock)
-            {
-                _service.DeleteAll<Flight>();
-                _service.DeleteAll<Airport>();
-                return Ok();
-            }
+            _service.DeleteAll<Flight>();
+            _service.DeleteAll<Airport>();
+            return Ok();
         }
     }
 }

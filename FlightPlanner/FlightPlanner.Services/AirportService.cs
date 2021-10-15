@@ -8,6 +8,7 @@ namespace FlightPlanner.Services
 {
     public class AirportService : EntityService<Airport>, IAirportService
     {
+        private readonly object balanceLock = new object();
         public AirportService(IFlightPlannerDbContext context) : base((FlightPlannerDbContext)context)
         {
         }
@@ -15,7 +16,7 @@ namespace FlightPlanner.Services
         public List<Airport> SearchAirports(string part)
         {
             part = part.Trim().ToUpper();
-            return (
+                return (
                from a in _context.Airports
                where (a.AirportCode.Trim().ToUpper().Contains(part) ||
                       a.City.Trim().ToUpper().Contains(part) ||

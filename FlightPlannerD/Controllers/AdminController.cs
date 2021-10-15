@@ -2,10 +2,8 @@
 using FlightPlanner.Core.Dto;
 using FlightPlanner.Core.Models;
 using FlightPlanner.Core.Services;
-using FlightPlanner.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +14,7 @@ namespace FlightPlannerD.Controllers
     [ApiController]
     public class AdminController : ControllerBase
     {
-        private readonly object balanceLock = new object();
+        private static readonly object balanceLock = new object();
         private readonly IEntityService<Flight> _flightService;
         private readonly IMapper _mapper;
         private readonly IEnumerable<IValidator> _validators;
@@ -31,11 +29,8 @@ namespace FlightPlannerD.Controllers
         [Route("flights/{id}")]
         public IActionResult GetFlight(int id)
         {
-            lock (balanceLock)
-            {
-                var flight = _flightService.GetById(id);
-                return flight != null ? Ok(_mapper.Map<FlightResponse>(flight)) : NotFound();
-            }
+            var flight = _flightService.GetById(id);
+            return flight != null ? Ok(_mapper.Map<FlightResponse>(flight)) : NotFound();
         }
 
         [HttpPut]
@@ -48,19 +43,17 @@ namespace FlightPlannerD.Controllers
                 {
                     return BadRequest();
                 }
-            }
+
                 var flight = _mapper.Map<Flight>(request);
-            lock (balanceLock)
-            {
                 if (_flightService.Exists(flight))
                 {
                     return Conflict();
                 }
-            }
-            lock (balanceLock)
-            {
-                _flightService.Create(flight);
-                return Created("", _mapper.Map<FlightResponse>(flight));
+                else
+                {
+                    _flightService.Create(flight);
+                    return Created("", _mapper.Map<FlightResponse>(flight));
+                }
             }           
         }
 
@@ -70,9 +63,9 @@ namespace FlightPlannerD.Controllers
         {
             lock (balanceLock)
             {
-                _flightService.DeleteFlightById(id);             
+                _flightService.DeleteFlightById(id);
+                return Ok();
             }
-            return Ok();
         } 
                 
     }
