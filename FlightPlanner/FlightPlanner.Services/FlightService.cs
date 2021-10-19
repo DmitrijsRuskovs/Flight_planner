@@ -86,7 +86,7 @@ namespace FlightPlanner.Services
         {
                 return Query()
                     .Include(f => f.To)
-                    .Include(f => f.From).ToList().Any(f =>
+                    .Include(f => f.From).Any(f =>
                     ((f.DepartureTime.Trim().ToUpper() == flight.DepartureTime.Trim().ToUpper()) &&
                      (f.ArrivalTime.Trim().ToUpper() == flight.ArrivalTime.Trim().ToUpper()) &&
                      (f.Carrier.Trim().ToUpper() == flight.Carrier.Trim().ToUpper()) &&

@@ -8,10 +8,6 @@ namespace FlightPlanner.Core.Models
 {
     public class Flight : Entity
     {
-        public Flight(int id)
-        {
-            Id = id;
-        }
 
         public Flight()
         {
